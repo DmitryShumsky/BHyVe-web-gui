@@ -1,0 +1,5 @@
+1. Login on BHyVe host computer
+  1.1. Password based authentification
+  1.2. Privileges per user
+2. Create\delete VM
+3. Limit RAM\CPU per VM
