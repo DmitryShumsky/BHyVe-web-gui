@@ -65,7 +65,7 @@ def encryption(receivedMessage):
             auth[clientID]
         except KeyError:
             auth[clientID] = {'encryptionStage': 0, 'key':'','id':clientID}
-            print 'client ID='+clientID
+            print clientID+'         client ID'
             return "hello;"+clientID
     elif receivedMessage[:5] == 'hello':
         clientID = receivedMessage[6:]
@@ -74,32 +74,31 @@ def encryption(receivedMessage):
         auth[clientID]['encryptionStage'] = 1
         print auth[clientID]['key'] + "          public key"
         return auth[clientID]['key']
-    if auth[receivedMessage[:32]]['encryptionStage'] == 1:
-        if auth[receivedMessage[:32]]['key'] == receivedMessage[32:]:
+    clientID = receivedMessage[:32]
+    body = receivedMessage[32:]
+    if auth[clientID]['encryptionStage'] == 1:
+        if auth[clientID]['key'] == body:
             #generate first private key
-            auth[receivedMessage[:32]]['key'] = hashlib.md5(''.join(random.sample(char_set*6, 15))).hexdigest().upper()
-            encryptedFirstPrivateKey = AES.new(receivedMessage[32:], AES.MODE_CBC, IV).encrypt(hashlib.md5(''.join(random.sample(char_set*6, 15))).hexdigest().upper())
-            print auth[receivedMessage[:32]]['key'] + "           firstPrivateKey"
-            auth[receivedMessage[:32]]['encryptionStage'] = 2
-            auth[receivedMessage[:32]]['key'] = encryptedFirstPrivateKey
-            return encryptedFirstPrivateKey
-    if auth[receivedMessage[:32]]['encryptionStage'] == 2:
-        if auth[receivedMessage[:32]]['key'] == receivedMessage[32:]:
+            auth[clientID]['key'] = hashlib.md5(''.join(random.sample(char_set*6, 15))).hexdigest().upper()
+            print auth[clientID]['key'] + "    first private key"
+            encryptedFirstPrivateKey = AES.new(body, AES.MODE_CBC, IV).encrypt(auth[clientID]['key'])
+        auth[clientID]['encryptionStage'] = 2
+        return encryptedFirstPrivateKey
+    if auth[clientID]['encryptionStage'] == 2:
+        if auth[clientID]['key'] == body:
+            print 'second private key'
             #generate second private key
-            encryptedSecondPrivateKey = AES.new(receivedMessage[32:], AES.MODE_CBC, IV).encrypt(hashlib.md5(''.join(random.sample(char_set*6, 15))).hexdigest().upper())
-            auth[receivedMessage[:32]]['key'] = hashlib.md5(''.join(random.sample(char_set*6, 15))).hexdigest().upper()
-            print auth[receivedMessage[:32]]['key'] + "           second Private Key"
-            auth[receivedMessage[:32]]['key'] = encryptedSecondPrivateKey
-            auth[receivedMessage[:32]]['encryptionStage'] = 3
-            return auth[receivedMessage[:32]]['key']
-    if auth[receivedMessage[:32]]['encryptionStage'] == 3:
-        print AES.new(auth[receivedMessage[:32]]['key'], AES.MODE_CBC, IV).decrypt(receivedMessage[32:])
-
+            auth[clientID]['key'] = hashlib.md5(''.join(random.sample(char_set*6, 15))).hexdigest().upper()
+            print auth[clientID]['key'] + '  second private key'
+            encryptedSecondPrivateKey = AES.new(body, AES.MODE_CBC, IV).encrypt(auth[clientID]['key'])
+            auth[clientID]['encryptionStage'] = 3
+            pring
+            return encryptedSecondPrivateKey
 
 
 
 
 
 configArray=parseConfig('/usr/local/etc/bhyvemc/bhyvemc.conf')
-print encryption('hello')
+#print encryption('hello')
 listenPort(configArray["listenPort"],configArray["listenIP"])
